@@ -245,7 +245,7 @@ So on held-out ids we see no advantage specific to the architecture: the ResNet 
 \item Our reproduction is not exact: \reproWithin{} of \reproCells{} cells are within \reproTol{} (Table~\ref{tab:repro}). The baselines' input encodings are inferred, and we did not examine the paper's statement about the 28k dataset.
 \item The tuned classical models received a 12-configuration search and the ResNet none. MLP and SVM changed encoding and tuning together.
 \item The hidden layer changes depth, parameters and non-linearity together. We did not run a linear two-layer control.
-\item The hold-out splits remove ids, not attribute values. \emph{Not significantly different} is not equality: with eight datasets the tests have limited power. We make many comparisons and report plain $p$-values, as the original paper does; values close to 0.05 should be read with caution.
+\item The hold-out splits remove ids, not attribute values. \emph{Not significantly different} is not equality: with eight datasets the tests have limited power.
 \item Not tested: policy-mining baselines, other network architectures, the depth-56 networks against the authors' weights, distillation, interpretation methods.
 \end{itemize}
 
