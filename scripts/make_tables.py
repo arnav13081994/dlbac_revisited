@@ -28,23 +28,20 @@ for m in NAME: M["f" + camel(m)] = f4(F(m).mean())
 
 # ---------- Table: ResNet minus each model (ladder) ----------
 order = ["rf_theirs", "mlp_raw_theirs", "svm_theirs", "rf_theirs_eq", "mlp_raw_theirs_eq", "svm_theirs_eq", "rf_tuned", "gb_tuned", "mlp_tuned", "svm_tuned", "rf_tuned_eq", "gb_tuned_eq", "mlp_tuned_eq", "svm_tuned_eq"]
-rows, ps = [], []
+rows = []
 for m in order:
-    d = F("resnet") - F(m); p = stats.ttest_rel(F("resnet"), F(m)).pvalue; ps.append(p); rows.append((m, F(m).mean(), d.mean(), int((d > 0).sum()), p))
-holm = A.holm(ps)
+    d = F("resnet") - F(m); p = stats.ttest_rel(F("resnet"), F(m)).pvalue; rows.append((m, F(m).mean(), d.mean(), int((d > 0).sum()), p))
 with open(f"{OUT}/tab_ladder.tex", "w") as f:
-    f.write("\\begin{tabular}{llrrrrr}\n\\toprule\nBaseline & Setting & F1 & ResNet minus baseline & Datasets won by ResNet & $p$ & adjusted $p$ \\\\\n\\midrule\n")
+    f.write("\\begin{tabular}{llrrrr}\n\\toprule\nBaseline & Setting & F1 & ResNet minus baseline & Datasets won by ResNet & $p$ \\\\\n\\midrule\n")
     prev = None
-    for (m, mean, d, w, p), h in zip(rows, holm):
+    for m, mean, d, w, p in rows:
         if prev and GROUP[m] != prev: f.write("\\midrule\n")
         prev = GROUP[m]; fam = {"rf": "RF", "gb": "GB", "mlp": "MLP", "svm": "SVM"}[m.split("_")[0]]
-        f.write(f"{fam} & {GROUP[m]} & {mean:.4f} & {d:+.4f} & {w} of 8 & {pf(p)} & {pf(h)} \\\\\n")
+        f.write(f"{fam} & {GROUP[m]} & {mean:.4f} & {d:+.4f} & {w} of 8 & {pf(p)} \\\\\n")
     f.write("\\bottomrule\n\\end{tabular}\n")
-    for (m, mean, d, w, p), h in zip(rows, holm):
-        M["d" + camel(m)] = sgn(d); M["w" + camel(m)] = str(w); M["p" + camel(m)] = pf(p); M["h" + camel(m)] = pf(h)
-M["holmFlips"] = ", ".join(NAME[m] for (m, *_), p, h in zip(rows, ps, holm) if (p < 0.05) != (h < 0.05)) or "none"
-print("ResNet minus each baseline:"); [print(f"  {NAME[m]:32s} F1 {mean:.4f} diff {d:+.4f} won {w}/8 p {p:.3f} holm {h:.3f}") for (m, mean, d, w, p), h in zip(rows, holm)]
-print("  conclusions that change after Holm adjustment over these comparisons:", M["holmFlips"])
+    for m, mean, d, w, p in rows:
+        M["d" + camel(m)] = sgn(d); M["w" + camel(m)] = str(w); M["p" + camel(m)] = pf(p)
+print("ResNet minus each baseline (paired t-test over the 8 datasets):"); [print(f"  {NAME[m]:40s} F1 {mean:.4f} diff {d:+.4f} won {w}/8 p {p:.3f}") for m, mean, d, w, p in rows]
 
 # ---------- Gain from the indicators, per family ----------
 gains = {}
@@ -107,7 +104,7 @@ for m in cold_models: M["drop" + camel(m)] = f4(CF(m, "warm").mean() - CF(m, "bo
 for aware in ("rf_tuned_eq", "gb_tuned_eq", "mlp_tuned_eq", "svm_tuned_eq"):
     for s in A.COLD: M["cd" + camel(aware) + camel(s)] = sgn((CF(aware, s) - CF("resnet", s)).mean())
     for s in A.COLD: M["chd" + camel(aware) + camel(s)] = sgn((CF(aware, s) - CF("resnet_head", s)).mean())
-# hold-out comparisons: difference of the means over datasets (paired t-test over the datasets, unadjusted), for the three cold sets
+# hold-out comparisons: difference of the means over datasets (paired t-test over the datasets), for the three cold sets
 CMP = [("ResNet minus tuned RF", "resnet", "rf_tuned"), ("ResNet minus tuned GB", "resnet", "gb_tuned"), ("ResNet minus tuned MLP", "resnet", "mlp_tuned"), ("ResNet minus tuned SVM", "resnet", "svm_tuned"), None,
        ("RF + indicators minus ResNet", "rf_tuned_eq", "resnet"), ("GB + indicators minus ResNet", "gb_tuned_eq", "resnet"), ("MLP + indicators minus ResNet", "mlp_tuned_eq", "resnet"), ("SVM + indicators minus ResNet", "svm_tuned_eq", "resnet"), None,
        ("ResNet + hidden layer minus RF + indicators", "resnet_head", "rf_tuned_eq"), ("ResNet + hidden layer minus GB + indicators", "resnet_head", "gb_tuned_eq"), ("ResNet + hidden layer minus MLP + indicators", "resnet_head", "mlp_tuned_eq"), ("ResNet + hidden layer minus SVM + indicators", "resnet_head", "svm_tuned_eq")]
@@ -115,27 +112,24 @@ cold_p = {}
 for c in CMP:
     if c is None: continue
     for s_ in A.COLD: cold_p[(c[0], s_)] = stats.ttest_rel(CF(c[1], s_), CF(c[2], s_)).pvalue
-keys = list(cold_p); cold_adj = dict(zip(keys, A.holm([cold_p[k] for k in keys]))); M["nColdTests"] = str(len(keys))
+keys = list(cold_p)
 with open(f"{OUT}/tab_cold_cmp.tex", "w") as f:
     f.write("\\begin{tabular}{lrrr}\n\\toprule\nComparison & User-cold & Resource-cold & Both-cold \\\\\n\\midrule\n")
     for c in CMP:
         if c is None: f.write("\\midrule\n"); continue
         lab, x, y = c
-        f.write(f"{lab} & " + " & ".join(f"{(CF(x, s_) - CF(y, s_)).mean():+.4f} ({pf(cold_p[(lab, s_)])}; {pf(cold_adj[(lab, s_)])})" for s_ in A.COLD) + " \\\\\n")
+        f.write(f"{lab} & " + " & ".join(f"{(CF(x, s_) - CF(y, s_)).mean():+.4f} ({pf(cold_p[(lab, s_)])})" for s_ in A.COLD) + " \\\\\n")
     f.write("\\bottomrule\n\\end{tabular}\n")
 grp = lambda pre: [k for k in keys if k[0].startswith(pre)]
 aw, hd = grp("RF + ind") + grp("GB + ind") + grp("MLP + ind") + grp("SVM + ind"), grp("ResNet + hidden layer minus RF") + grp("ResNet + hidden layer minus GB") + grp("ResNet + hidden layer minus MLP")
-M["coldAwareN"] = str(len(aw)); M["coldAwareUnadj"] = str(sum(cold_p[k] < .05 for k in aw)); M["coldAwareAdj"] = str(sum(cold_adj[k] < .05 for k in aw))
-M["coldHeadN"] = str(len(hd)); M["coldHeadUnadj"] = str(sum(cold_p[k] < .05 for k in hd)); M["coldHeadAdj"] = str(sum(cold_adj[k] < .05 for k in hd))
+M["coldAwareN"] = str(len(aw)); M["coldAwareSig"] = str(sum(cold_p[k] < .05 for k in aw)); M["coldHeadN"] = str(len(hd)); M["coldHeadSig"] = str(sum(cold_p[k] < .05 for k in hd))
 for nm, pre in (("Rf", "ResNet minus tuned RF"), ("Gb", "ResNet minus tuned GB"), ("Mlp", "ResNet minus tuned MLP"), ("Svm", "ResNet minus tuned SVM")):
-    kk = grp(pre); M["coldRes" + nm + "UnadjMax"] = pf(max(cold_p[k] for k in kk)); M["coldRes" + nm + "AdjMin"] = pf(min(cold_adj[k] for k in kk)); M["coldRes" + nm + "AdjMax"] = pf(max(cold_adj[k] for k in kk))
-print("hold-out comparisons significant: equality-aware minus ResNet", M["coldAwareUnadj"], "unadjusted /", M["coldAwareAdj"], "after Holm of", M["coldAwareN"], "| hidden-layer minus aware (RF, GB, MLP)", M["coldHeadUnadj"], "/", M["coldHeadAdj"], "of", M["coldHeadN"])
-ud = [CF(m, "user_cold").mean() - CF(m, "warm").mean() for m in cold_models]; M["userDeltaMin"] = sgn(min(ud)); M["userDeltaMax"] = sgn(max(ud))  # user-cold minus warm, over the models of the cold table
+    M["coldRes" + nm + "PMax"] = pf(max(cold_p[k] for k in grp(pre)))
+print("hold-out comparisons with p < 0.05: equality-aware minus ResNet", M["coldAwareSig"], "of", M["coldAwareN"], "| hidden-layer minus equality-aware RF, GB, MLP", M["coldHeadSig"], "of", M["coldHeadN"])
 print("cold F1 (warm -> both-cold drop):", {m: (f4(CF(m, 'warm').mean()), f4(CF(m, 'both_cold').mean())) for m in cold_models})
 
 dl = F("resnet") - F("rf_theirs"); M["rfLeadLargeMinU"] = f4(dl[2:].min()); M["rfLeadLargeMaxU"] = f4(dl[2:].max())  # the six larger datasets (19k-32k), for the paper's "0.03 to 0.09 improvements over RF"
 for m_ in NAME: M["spread" + camel(m_)] = f4(F(m_).std(ddof=1))  # standard deviation of the per-dataset F1 over the 8 datasets
-M["nLadder"] = str(len(order))
 import glob; M["nCells"] = str(len([f for f in glob.glob(f"{ROOT}/*/*.json") if not f.split("/")[1].startswith("_")]))  # stored result cells (one json each)
 # ---------- Port check (E2): shipped weights, confusion counts ----------
 E2 = json.load(open(f"{ROOT}/e2_port_results.json")); t2 = E2["models"]["tf_same"]

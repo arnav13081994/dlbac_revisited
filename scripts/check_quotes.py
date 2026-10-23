@@ -1,4 +1,4 @@
-"""Checks that every passage we quote from the DLBAC paper occurs verbatim in its text. The paper is not distributed here: get arXiv:2203.15124v1 yourself and convert it with `pdftotext paper.pdf paper.txt` (default reading order, not -layout).
+"""Checks that every passage we quote from the DLBAC paper occurs verbatim in its text. The paper is not distributed here: get the paper yourself (arXiv:2203.15124, or the CODASPY camera-ready PDF, which has the same text) and convert it with `pdftotext paper.pdf paper.txt` (default reading order, not -layout).
 A quote is a "double-quoted" or ``LaTeX-quoted'' passage; "..." inside a quote splits it into pieces that are checked separately. Case, whitespace, ligatures, hyphenation at line ends, the space before 's and the space the PDF puts inside dataset names (u5k-r 5k) are ignored.
 usage: python -I scripts/check_quotes.py paper.txt docs/claims_audit.md paper/main.tex ...   (prints MISSING lines, exit 1 if any)"""
 import re, sys, unicodedata
