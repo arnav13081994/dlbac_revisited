@@ -1,0 +1,33 @@
+E5, authors' split: mean F1 over datasets: resnet 0.9398, resnet_head 0.9500, resnet_eq 0.9403, resnet_eq_head 0.9499, rf_tuned_eq 0.9489, gb_tuned_eq 0.9545, mlp_tuned_eq 0.9475
+
+FAMILY (6 comparisons, Holm), margin 0.01 F1 [difference, 95% bootstrap CI, first-named wins]
+ResNet+eqH minus ResNet            +0.0101 [+0.0077, +0.0127] 8/8  p_diff(Holm) 0.001  TOST(Holm) 1.000  non-inferior no   first-named better     equiv@x0.5 n @x2.0 Y
+ResNet+eqH minus ResNetH           -0.0000 [-0.0011, +0.0010] 4/8  p_diff(Holm) 1.000  TOST(Holm) 0.000  non-inferior yes  equivalent             equiv@x0.5 Y @x2.0 Y
+ResNetH minus ResNet               +0.0101 [+0.0079, +0.0126] 8/8  p_diff(Holm) 0.001  TOST(Holm) 1.000  non-inferior no   first-named better     equiv@x0.5 n @x2.0 Y
+RF+eq minus ResNet+eqH             -0.0011 [-0.0080, +0.0040] 5/8  p_diff(Holm) 1.000  TOST(Holm) 0.063  non-inferior yes  inconclusive           equiv@x0.5 n @x2.0 Y
+GB+eq minus ResNet+eqH             +0.0045 [+0.0004, +0.0085] 6/8  p_diff(Holm) 0.315  TOST(Holm) 0.063  non-inferior no   inconclusive           equiv@x0.5 n @x2.0 Y
+MLP+eq minus ResNet+eqH            -0.0024 [-0.0073, +0.0016] 3/8  p_diff(Holm) 1.000  TOST(Holm) 0.049  non-inferior yes  equivalent             equiv@x0.5 n @x2.0 Y
+
+E5, cold splits: mean F1 over datasets: user_cold: resnet 0.9383, resnet_eq_head 0.9489, gb_tuned_eq 0.9545; resource_cold: resnet 0.9263, resnet_eq_head 0.9411, gb_tuned_eq 0.9468; both_cold: resnet 0.9184, resnet_eq_head 0.9360, gb_tuned_eq 0.9448
+
+FAMILY, cold splits (12 comparisons, Holm), margin 0.02 F1 (sensitivity x0.5 = 0.01, x1.5 = 0.03)
+user_cold: ResNet+eqH minus RF+eq  -0.0064 [-0.0102, -0.0030] 0/8  p_diff(Holm) 0.093  TOST(Holm) 0.001  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+user_cold: ResNet+eqH minus GB+eq  -0.0056 [-0.0092, -0.0024] 0/8  p_diff(Holm) 0.093  TOST(Holm) 0.001  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+user_cold: ResNet+eqH minus MLP+eq -0.0052 [-0.0089, -0.0022] 0/8  p_diff(Holm) 0.093  TOST(Holm) 0.001  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+user_cold: ResNet+eqH minus ResNet +0.0106 [+0.0062, +0.0164] 8/8  p_diff(Holm) 0.063  TOST(Holm) 0.021  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+resource_cold: ResNet+eqH minus RF+eq -0.0060 [-0.0095, -0.0032] 0/8  p_diff(Holm) 0.071  TOST(Holm) 0.001  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+resource_cold: ResNet+eqH minus GB+eq -0.0058 [-0.0093, -0.0028] 0/8  p_diff(Holm) 0.093  TOST(Holm) 0.001  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+resource_cold: ResNet+eqH minus MLP+eq -0.0060 [-0.0120, -0.0013] 1/8  p_diff(Holm) 0.093  TOST(Holm) 0.005  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+resource_cold: ResNet+eqH minus ResNet +0.0147 [+0.0112, +0.0188] 8/8  p_diff(Holm) 0.002  TOST(Holm) 0.038  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+both_cold: ResNet+eqH minus RF+eq  -0.0084 [-0.0121, -0.0052] 0/8  p_diff(Holm) 0.031  TOST(Holm) 0.002  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+both_cold: ResNet+eqH minus GB+eq  -0.0087 [-0.0127, -0.0051] 0/8  p_diff(Holm) 0.035  TOST(Holm) 0.003  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+both_cold: ResNet+eqH minus MLP+eq -0.0080 [-0.0144, -0.0032] 0/8  p_diff(Holm) 0.093  TOST(Holm) 0.009  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+both_cold: ResNet+eqH minus ResNet +0.0177 [+0.0139, +0.0217] 8/8  p_diff(Holm) 0.001  TOST(Holm) 0.155  non-inferior no   first-named better     equiv@x0.5 n @x1.5 Y
+
+E5c FAMILY, cold splits (6 comparisons, Holm), margin 0.02 F1, head-only control (sensitivity x0.5 = 0.01, x1.5 = 0.03)
+user_cold: ResNet+eqH minus ResNetH +0.0024 [-0.0001, +0.0053] 4/8  p_diff(Holm) 0.451  TOST(Holm) 0.000  non-inferior yes  equivalent             equiv@x0.5 Y @x1.5 Y
+user_cold: ResNetH minus ResNet    +0.0082 [+0.0052, +0.0128] 8/8  p_diff(Holm) 0.031  TOST(Holm) 0.002  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+resource_cold: ResNet+eqH minus ResNetH +0.0010 [-0.0016, +0.0041] 3/8  p_diff(Holm) 0.555  TOST(Holm) 0.000  non-inferior yes  equivalent             equiv@x0.5 Y @x1.5 Y
+resource_cold: ResNetH minus ResNet +0.0137 [+0.0097, +0.0180] 8/8  p_diff(Holm) 0.002  TOST(Holm) 0.026  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y
+both_cold: ResNet+eqH minus ResNetH +0.0031 [-0.0007, +0.0076] 4/8  p_diff(Holm) 0.451  TOST(Holm) 0.000  non-inferior yes  equivalent             equiv@x0.5 Y @x1.5 Y
+both_cold: ResNetH minus ResNet    +0.0146 [+0.0109, +0.0183] 8/8  p_diff(Holm) 0.001  TOST(Holm) 0.026  non-inferior yes  equivalent             equiv@x0.5 n @x1.5 Y

@@ -1,0 +1,6 @@
+seed,resnet,rf_default,rf_default_eq,rf_tuned,rf_tuned_eq,rf_tuned_gt_default,rf_default_eq_gt_default,rf_tuned_eq_gt_tuned,mlp_default,mlp_default_eq,mlp_tuned,mlp_tuned_eq,mlp_tuned_gt_default,mlp_default_eq_gt_default,mlp_tuned_eq_gt_tuned,svm_default,svm_default_eq,svm_tuned,svm_tuned_eq,svm_tuned_gt_default,svm_default_eq_gt_default,svm_tuned_eq_gt_tuned,gb_tuned,gb_tuned_eq,gb_eq_gt
+0,0.9397,0.9154,0.9421,0.9194,0.9489,True,True,True,0.8336,0.9090,0.9361,0.9487,True,True,True,0.7729,0.9155,0.9336,0.9542,True,True,True,0.9367,0.9545,True
+1,0.9395,0.9148,0.9423,0.9196,0.9489,True,True,True,0.8292,0.9082,0.9399,0.9473,True,True,True,0.7729,0.9155,0.9339,0.9543,True,True,True,0.9361,0.9542,True
+2,0.9412,0.9153,0.9419,0.9195,0.9488,True,True,True,0.8193,0.9084,0.9369,0.9475,True,True,True,0.7729,0.9155,0.9343,0.9537,True,True,True,0.9363,0.9541,True
+3,0.9394,0.9152,0.9419,0.9193,0.9486,True,True,True,0.8274,0.9083,0.9387,0.9463,True,True,True,0.7729,0.9155,0.9335,0.9542,True,True,True,0.9361,0.9544,True
+4,0.9393,0.9150,0.9418,0.9200,0.9491,True,True,True,0.8318,0.9073,0.9385,0.9478,True,True,True,0.7729,0.9155,0.9336,0.9542,True,True,True,0.9367,0.9550,True

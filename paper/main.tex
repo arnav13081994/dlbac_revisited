@@ -1,0 +1,283 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage{booktabs,array,amsmath,graphicx,xcolor,enumitem}
+\usepackage{pgfplots}\pgfplotsset{compat=1.17}
+\usepackage[hidelinks]{hyperref}
+\input{generated/numbers.tex}
+\input{generated/overlap.tex}
+\newcommand{\Fone}{F1}
+\newcommand{\margin}{0.01}
+\newcommand{\dlbac}{DLBAC}
+\newcommand{\repo}{\href{https://github.com/arnav13081994/dlbac_revisited}{\texttt{dlbac\_revisited}}}
+\newcommand{\repofile}[1]{\href{https://github.com/arnav13081994/dlbac_revisited/blob/main/#1}{\texttt{\detokenize{#1}}}}
+
+\title{Revisiting Deep Learning Based Access Control:\\ Baseline Strength, Relational Features and Generalisation}
+\author{Arnav Choudhury}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Nobi et al.\ proposed Deep Learning Based Access Control (DLBAC), in which a residual network (ResNet) decides access requests from the raw metadata of the user and the resource. On their eight synthetic datasets the ResNet reaches a higher F1 score than random forest, SVM and MLP baselines. We repeat this comparison on the authors' own datasets, split and metrics, with a PyTorch port of their released training script, and ask whether the ResNet's advantage reflects the configuration of the baselines, the structure of the benchmark's labels, or the architecture. The ordering of the published comparison reproduces. After a small hyperparameter search (and one-hot inputs for the MLP and SVM), the MLP, SVM and gradient boosting are not significantly different from the ResNet (point differences below \margin{} F1). The benchmark's rules include constraints that compare user and resource attributes, and 64 generic equality indicators raise every classical model: with them the paper's own default random forest is not significantly different from the ResNet, and every tuned family is above it (significantly for gradient boosting and SVM after adjusting for multiple comparisons). On amazon1, a real-world dataset without such structure, the ResNet has no advantage over a tuned random forest. On the authors' split, one hidden layer in the ResNet's output head raises F1 by \vHeadVsResnetU{} on all eight datasets (\vHeadEqVsEqU{} when both versions have the indicators) and takes it to a level not significantly different from the equality-aware MLP and random forest. On users and resources held out of training the equality-aware classical models lead the authors' ResNet in every condition (all \coldAwareN{} comparisons on the unadjusted test, \coldAwareAdj{} after adjusting for multiple comparisons), and the hidden-layer ResNet still trails them in the point estimates. We release the code, the stored results and a guide for reproducing them.
+\end{abstract}
+
+\section{Introduction}
+
+Deep Learning Based Access Control (DLBAC) \cite{nobi2022} replaces hand-written access rules by a neural network that reads the raw metadata of a user and a resource and outputs grant or deny for each operation. Throughout this paper \emph{the authors} are the authors of DLBAC \cite{nobi2022}, and \emph{we} refers to the author of this paper. The authors released their data, code and trained networks. That is what makes the work easy to build on: we use their data, check our port of their network against their shipped weights, and follow their training script.
+
+Their evaluation (Section~5 of \cite{nobi2022}) compares a residual network (ResNet) with random forest (RF), support vector machine (SVM) and multilayer perceptron (MLP) baselines on eight synthetic datasets. The DLBAC instances have the highest F1 scores, and the authors write that ``deep learning based algorithms generally perform better than traditional ML and MLP techniques'' (Sec.~5.1).
+
+A gap on a benchmark can come from several places. We ask three questions about this one.
+\begin{description}[leftmargin=2.2cm, style=nextline, itemsep=2pt]
+\item[Q1 Baseline configuration.] Does it depend on how the baselines were set up (input encoding, tuning)?
+\item[Q2 Label structure.] Does it depend on how the benchmark's labels are generated?
+\item[Q3 Architecture.] Does the advantage come from the residual network itself?
+\end{description}
+We keep to the authors' datasets, train/test split and metrics, and we follow their released code where it differs from their text (Section~\ref{sec:text-code}). We add three things: baselines that are tuned and given one-hot inputs; 64 generic \emph{equality indicators}; and, for the ResNet, one change to its output layer. Sections~\ref{sec:baselines}--\ref{sec:arch} take the questions in turn.
+
+\paragraph{Short answers.}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{Q1, the baselines.} Largely yes. With the default configurations the ResNet is ahead of the MLP by \dMlpRawTheirsU{} and of the SVM by \dSvmTheirsU{} F1. With a 12-configuration search (and one-hot inputs for the MLP and SVM) the differences are \dMlpTuned{} (MLP), \dSvmTuned{} (SVM) and \dGbTuned{} (gradient boosting), none of them significant (no difference was shown; equivalence was not established). Against a random forest the lead shrinks only from \dRfTheirs{} to \dRfTuned{}.
+\item \textbf{Q2, the labels.} The evidence points to them. The labels come from rules whose constraints compare user and resource attributes (Sec.~4.1 of \cite{nobi2022}). Adding 64 generic equality indicators raises every classical family on all eight datasets. For the paper's own default random forest the indicators alone remove the ResNet's lead (\dRfTheirsEq, $p=\pRfTheirsEq$); the default MLP and SVM gain \gainDefMlpU{} and \gainDefSvmU{} but stay behind it (by \dMlpRawTheirsEqU{} and \dSvmTheirsEqU{}), so for them encoding and tuning matter as well. With tuning and indicators each family scores above the authors' ResNet (by \dMlpTunedEqU{} to \dGbTunedEqU{} F1; significantly so for GB and SVM after adjusting for multiple comparisons). On amazon1, a real-world dataset with no such structure, the ResNet is not ahead of a tuned random forest or gradient boosting (AUC \amResnetAuc{} against \amRfTunedAuc{} and \amGbTunedAuc).
+\item \textbf{Q3, the architecture.} Not as configured. On the authors' split the ResNet is not significantly different from the tuned MLP, SVM and GB. A hidden layer in its output head adds \vHeadVsResnetU{} F1 on all eight datasets (\vHeadEqVsEqU{} when both versions have the indicators), which takes it to a level not significantly different from the equality-aware MLP and RF on that split. On users and resources held out of training it still trails the equality-aware models in the point estimates, and we did not separate depth, parameters and non-linearity.
+\end{itemize}
+
+\paragraph{Contributions.} (i) A check that our PyTorch network reproduces the authors' shipped network, and a comparison of our runs with their published figures. (ii) A ladder from the paper's default baselines to tuned baselines, each without and with the indicators. (iii) A test of the label structure: generic features, and a control on a real-world dataset without such structure. (iv) A test of the ResNet with a hidden layer in its head, and of all models on users and resources held out of training. (v) Code and stored results.
+
+Table~\ref{tab:claims} lists the statements of the original paper that these experiments bear on. The paper makes further statements (on other network architectures, policy-mining baselines, distillation and interpretation) that we did not test.
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{0.5cm}p{6.3cm}p{0.9cm}p{0.7cm}p{6.2cm}@{}}
+\toprule
+ & Statement in \cite{nobi2022} & Sec. & Q & What we find \\
+\midrule
+1 & ``deep learning based algorithms generally perform better than traditional ML and MLP techniques'' & 5.1 & Q1, Q2 & True against the default baselines; not significantly different from tuned MLP, SVM and GB; the default RF with indicators is not significantly different either, and the tuned families with indicators are ahead. \\
+2 & ``instances achieved the highest F1 score, while SVM and MLP performed the worst'' & 5.2.1 & Q1 & Reproduced with default configurations; not once the MLP and SVM are tuned. \\
+3 & improvements over RF ``are significant (for p-value < 0.05; paired T-test (not shown here))'' & 5.2.1 & Q1 & The pooled difference over the default RF is reproduced (the per-dataset test is not repeated); per-dataset leads on the six larger datasets are \rfLeadLargeMinU{} to \rfLeadLargeMaxU{} against the ``0.03 to 0.09'' quoted there (Sec.~5.2.1). \\
+4 & ``the lowest variation in its performance across the datasets'' & 5.2.1 & Q1 & Descriptive (standard deviation of the per-dataset F1): the ResNet's spread (\spreadResnet) is below the default RF, SVM and MLP with or without indicators (\spreadRfTheirsEq{} to \spreadSvmTheirsEq) and the tuned models without indicators (\spreadMlpTuned{} to \spreadRfTuned), above tuned GB, SVM and RF with indicators (\spreadGbTunedEq{} to \spreadRfTunedEq), and equal to the tuned MLP with indicators (\spreadMlpTunedEq). \\
+5 & ``the performance advantages of'' DLBAC ``are not apparent in the Amazon datasets'' & 5.2.1 & Q2 & Agrees for amazon1: the ResNet's AUC is below that of tuned RF and GB, and every model's F1 is close to the all-allow value. The UCI set, amazon2 and amazon3 are not used. \\
+6 & ``is more effective and robust than classical ML approaches, including MLP, for making accurate access decisions'' & 5.2.1 & Q1--Q3 & Holds against the default baselines only. \\
+7 & ``generalizing well to situations that were not seen during training time'' & 1 & Q3 & On held-out ids the ResNet is ahead of tuned RF and, on two of three sets, SVM on the unadjusted test (not after adjustment), and not significantly different from tuned GB and MLP; equality-aware classical models are ahead of it in every condition. Rule-mining baselines not run. \\
+8 & ``it obviates the need for attribute/role engineering, policy engineering, etc.'' & 8 & Q2, Q3 & The hidden-layer ResNet needs no indicators (they add \vIndicatorsOnHeadU{}); the authors' ResNet gains \vIndicatorsOnResnetU{} and trails the classical models that have them. \\
+\bottomrule
+\end{tabular}
+\caption{Statements of the original paper examined here. Quotations are from arXiv version 1.}
+\label{tab:claims}
+\end{table}
+
+\section{Setup}\label{sec:setup}
+
+\subsection{Benchmark and metrics}
+The benchmark has eight synthetic datasets from the authors' generator (Sec.~4.1 of \cite{nobi2022}), named by users, resources and authorization tuples (from \texttt{u4k-r4k-auth11k} to \texttt{u6k-r6k-auth32k}; we write 11k to 32k). Each tuple holds the user's metadata, the resource's metadata and four permission bits, one per operation. We use the authors' own train and test files, which split each dataset 80\%/20\% (Sec.~5.1). Metrics follow their evaluation code: F1 at threshold 0.5, pooled over the four operations; false-positive rate, true-positive rate and precision are in Appendix~A. Unless stated, F1 is the mean over the eight datasets, each dataset's value being the mean over five seeds.
+
+\subsection{Where the paper's text and its released code differ}\label{sec:text-code}
+In three places the text of \cite{nobi2022} and the released script differ. We follow the code, because it is what the authors released with their data and weights, and it produces numbers close to their published figures (Table~\ref{tab:repro}).
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.3cm}p{4.2cm}p{5.8cm}@{}}
+\toprule
+ & Paper text & Released code (used here) \\
+\midrule
+Visible metadata (datasets with more than 8 per side) & ``the first eight user metadata and the first eight resource metadata'' (Sec.~4.3) & user fields 0--7 and the \emph{last} 8 resource fields \\
+Network depth & 8 for the first four datasets of its Table~1, 50 for the rest & 8 without hidden metadata (11k, 12k), 56 otherwise \\
+Training & 60 epochs; learning rate divided by ten every 10 epochs; early stop after 5 epochs without improvement (Sec.~5.1) & depth 8: 60 epochs, divided by ten after epochs 20 and 40; depth 56: 30 epochs, divided by ten after epochs 10 and 20; no early stopping; a plateau-based rate reducer is also present, which we expect has no effect because the step schedule sets the rate at the start of every epoch (not tested) \\
+\bottomrule
+\end{tabular}
+\caption{Text versus code.}\label{tab:textcode}
+\end{table}
+
+\subsection{Our network and the port check}
+The authors' network is a Keras ResNet. We use a PyTorch version with Keras-style padding for strided convolutions. To check it, we loaded the authors' shipped weights for the smallest dataset (11k, depth 8) into our network and evaluated their test file. The confusion counts are TN~\portTN, FP~\portFP, FN~\portFN, TP~\portTP, identical to the counts the authors log (a difference of \portDiff{} of \portDecisions{} decisions; F1 \portFOne). With symmetric padding the same weights give F1 \portFOneSymmetric. The check covers the forward pass of the depth-8 network; it does not cover training, nor the depth-56 networks.
+
+\subsection{Baselines, indicators and our additions}\label{sec:additions}
+\paragraph{Default baselines.} The paper uses scikit-learn's \texttt{SVC} and \texttt{RandomForestClassifier} ``with their default configurations'' and an MLP with four hidden layers (Sec.~5.1). The baseline code is not part of the release. We re-ran the three as follows: RF and SVC at library defaults, SVC on standardised integer codes, and a scikit-learn MLP with four hidden layers of 128 units on integer codes (the paper's MLP is a Keras model). The paper does not state the baselines' input encoding or the MLP's width; we chose the encoding that reproduces its RF and SVM figures (Table~\ref{tab:repro}). We call these the \emph{default} baselines.
+\paragraph{Tuned baselines.} RF, gradient boosting (GB, scikit-learn's \texttt{HistGradientBoostingClassifier}), MLP and SVM (RBF kernel), each with 12 configurations compared on a 20\% validation split of the training data and then refit on all of it. The MLP and SVM take one-hot inputs; RF and GB take integer codes.
+\paragraph{Equality indicators.} For every pair of a visible user field $i$ and a visible resource field $j$, one binary feature that is 1 when the two values are equal: 64 features. They are generic. They do not say which pair any rule uses, and they use only the inputs. \emph{Default + indicators} and \emph{tuned + indicators} mean the default or tuned baseline with these 64 features added (for the default SVM they are standardised with the integer codes).
+\paragraph{ResNet with a hidden layer.} The authors' network ends in a pooled 64-dimensional vector and one linear layer with sigmoid outputs. For the ResNet with indicators we concatenate the indicators to the pooled vector. For the \emph{hidden-layer} variant we insert one layer of 128 ReLU units before the output layer, with or without the indicators. Nothing else changes.
+
+\subsection{Seeds and tests}\label{sec:tests}
+Every model is run with five seeds on each dataset on the authors' split, and with three split seeds on the hold-out splits of Section~\ref{sec:arch}. Figures show the mean over seeds, with the standard deviation over seeds as error bars. As in the original paper, we test differences with a paired $t$-test, with $p<0.05$ taken as significant (the original does not say what its test is paired over). Our pairing is over the eight datasets, using each dataset's mean over seeds. Because Table~\ref{tab:ladder} makes \nLadder{} such comparisons, it also gives the Holm-adjusted $p$. Where a difference is not significant we also ask whether it is small: we ran two one-sided equivalence tests at a margin of \margin{} F1 (reports: \repofile{results/REPORT_e1.txt}, \repofile{results/REPORT_e5.txt} and \repofile{results/REPORT_e6.txt}). For the comparisons of the ResNet with the tuned MLP, SVM and GB (Section~\ref{sec:baselines}) they were inconclusive, so we write \emph{not significantly different} and do not claim equivalence.
+
+\begin{table}[t]
+\centering\footnotesize
+\input{generated/tab_reproduction.tex}
+\caption{Our runs against the F1 values read off the figures of \cite{nobi2022} (resolution about 0.015). Bold: more than \reproTol{} apart. \reproWithin{} of \reproCells{} cells are within \reproTol{}. The four MLP cells outside the tolerance are higher in our runs; the paper does not give the MLP's width or input. Our ResNet on 28k is below the published value, and we have no explanation for it.}
+\label{tab:repro}
+\end{table}
+
+\section{Q1: does the advantage depend on the baselines' configuration?}\label{sec:baselines}
+
+\subsection{Result}
+The ordering of the published comparison reproduces: the ResNet has F1 \fResnet{}, against \fRfTheirs{} for RF, \fMlpRawTheirs{} for MLP and \fSvmTheirs{} for SVM (Table~\ref{tab:ladder}; Figure~\ref{fig:ladder}). Tuning with one-hot inputs changes the picture. The MLP rises to \fMlpTuned{} and the SVM to \fSvmTuned{}; gradient boosting reaches \fGbTuned{}. The ResNet's lead over these three is \dMlpTuned{}, \dSvmTuned{} and \dGbTuned{}, with unadjusted $p$ of \pMlpTuned{}, \pSvmTuned{} and \pGbTuned{}. Not significant is not the same as equivalent (Section~\ref{sec:tests}). A tuned RF reaches only \fRfTuned{}; the ResNet's lead of \dRfTuned{} is significant on the unadjusted test ($p=\pRfTuned$) and not after adjustment (\hRfTuned).
+
+Each tuned RF, MLP and SVM is above its default version in \seedOrderConfig{}. The standard deviation over seeds of the ResNet's mean F1 is \seedSdResnet{}. Figure~\ref{fig:ladder} and Table~\ref{tab:ladder} also contain the baselines with the indicators, which Section~\ref{sec:labels} discusses.
+
+\begin{figure}[t]
+\centering
+\input{generated/fig_ladder.tex}
+\caption{F1 of every model on the authors' split. The dashed line marks the authors' ResNet. Error bars are the standard deviation over five seeds and are mostly smaller than the markers. The underlying numbers are in Table~\ref{tab:ladder} and Appendix~A.}
+\label{fig:ladder}
+\end{figure}
+
+\begin{table}[t]
+\centering\footnotesize
+\input{generated/tab_ladder.tex}
+\caption{The authors' ResNet minus each baseline (F1, mean over the eight datasets). \emph{Datasets won}: datasets on which the ResNet is higher. $p$: paired $t$-test over the datasets. Adjusted $p$: Holm adjustment over the \nLadder{} rows.}
+\label{tab:ladder}
+\end{table}
+
+\subsection{Explanation}
+Between the default and the tuned MLP and SVM two things change together: the input (integer codes become one-hot vectors) and the settings (12 configurations instead of one). With integer codes a model sees an ordering of categories that carries no meaning, which can matter for an RBF-kernel SVM and a small MLP and matters less for trees. That fits the pattern, RF changing least, but we did not test it, and we do not separate encoding from tuning.
+
+\subsection{What this does not show}
+The ResNet is not tuned in this comparison. It is the authors' recipe as released, with the one change of Section~\ref{sec:arch}. Our default MLP is also above the published one by more than the tolerance in four cells of Table~\ref{tab:repro} (\reproMlpGap{} on average over the eight datasets), so the published MLP gap is larger than the one in Table~\ref{tab:ladder}.
+
+\paragraph{Conclusion.} The published ordering reproduces with the default baselines, but it does not survive a change of baseline configuration: with one-hot inputs and a small search the MLP, SVM and gradient boosting are not significantly different from the ResNet (differences up to \dSvmTunedU{}). Only the random forest stays behind in the point estimates (\dRfTuned{}; $p=\pRfTuned$ unadjusted, \hRfTuned{} after adjustment). So most of the published gap to the MLP and SVM reflects how those baselines were configured; the remaining gap to the random forest is taken up in Section~\ref{sec:labels}.
+
+\section{Q2: does the advantage depend on the structure of the labels?}\label{sec:labels}
+
+\subsection{Premise}
+The authors' generator builds labels from rules of the form $\langle$user attributes, resource attributes, operation, constraint$\rangle$. Their example is a rule whose constraint is \texttt{department=department}: ``A user will be authorized to operate on a resource if the user satisfies the UAE, the resource satisfies the RAE, and both the user and resource satisfy the constraint'' (Sec.~4.1). So, for rules of this kind, the label of a request depends on whether an attribute of the user equals an attribute of the resource. A model that sees the two columns separately has to learn this equality value by value.
+
+\subsection{Result}
+We add the 64 equality indicators of Section~\ref{sec:additions} to the default baselines and to the tuned baselines. F1 rises for every family on all eight datasets, with and without tuning (Table~\ref{tab:gain}), and in \seedOrderIndicators{}: by \gainDefRfU{} (default RF), \gainDefMlpU{} (default MLP) and \gainDefSvmU{} (default SVM), and by \gainRfU{} (RF), \gainGbU{} (GB), \gainMlpU{} (MLP) and \gainSvmU{} (SVM) after tuning.
+
+Compared with the authors' ResNet (Table~\ref{tab:ladder}), the default RF with indicators is not significantly different (\dRfTheirsEq{}, $p=\pRfTheirsEq$): for the paper's own random forest the indicators alone remove the ResNet's lead. The default MLP and SVM improve a great deal but stay behind the ResNet, by \dMlpRawTheirsEqU{} ($p=\pMlpRawTheirsEq$) and \dSvmTheirsEqU{} ($p=\pSvmTheirsEq$): for them the encoding and tuning matter as well. With tuning and indicators every family is above the ResNet, by \dRfTunedEqU{} (RF), \dMlpTunedEqU{} (MLP), \dSvmTunedEqU{} (SVM) and \dGbTunedEqU{} (GB). All four differences are significant on the unadjusted test; after Holm adjustment over the \nLadder{} rows GB (\hGbTunedEq) and SVM (\hSvmTunedEq) remain so, and RF (\hRfTunedEq) and MLP (\hMlpTunedEq) do not.
+
+\begin{table}[t]
+\centering\footnotesize
+\input{generated/tab_gain.tex}
+\caption{F1 (mean over eight datasets) of each family in the default and in the tuned configuration, without and with the 64 equality indicators. GB has no default configuration in the original paper.}
+\label{tab:gain}
+\end{table}
+
+Adding the same indicators to the authors' ResNet (concatenated to the pooled vector before its linear output layer) changes F1 by \vIndicatorsOnResnet{} ($p=\vpIndicatorsOnResnet$). That shows this fusion does not help; it does not show whether the network already represents the relation. Section~\ref{sec:arch} returns to this.
+
+\subsection{A control without equality structure}\label{sec:control}
+The released repository also contains the Kaggle Amazon access data, \emph{amazon1}: \nAmazonTuples{} tuples (\nAmazonTrain{} train, \nAmazonTest{} test) with eight user fields, one resource field (an identifier) and one operation; the test file is \amPosRate\% allows. There are no user-resource attribute pairs for the indicators to compare, and the labels were not generated by rules of the kind above. We do not use the DLBAC paper's UCI dataset, which is not part of the released repository, or amazon2 and amazon3, which are augmented versions of amazon1. The released script reads only the synthetic format (four operations, one-hot input), so for amazon1 we follow the paper's text: ``Amazon dataset's metadata values are too sparse, and we use binary encoding for them'' (Sec.~4.3). We write the rank of each value among the values of its field in binary, and train the ResNet with the same recipe (depth 8, 60 epochs). The default RF, SVM and MLP take the raw Kaggle identifiers as integer codes (standardised for the SVM); the tuned RF and GB take the same codes and the tuned MLP the flattened binary grid; none has indicators. Every model has five seeds.
+
+F1 is uninformative on this dataset: because the test file is \amPosRate\% allows, a classifier that allows every request scores \amAllAllowFOne{} (Table~\ref{tab:amazon}). The published F1 values of the SVM and the MLP (0.970) are at that level, and in our runs both predict allow for almost every request. We therefore also report the false-positive rate and the area under the ROC curve (AUC). The ResNet's AUC (\amResnetAuc) is below that of the default random forest (\amRfTheirsAuc), the tuned random forest (\amRfTunedAuc) and the tuned gradient boosting (\amGbTunedAuc), and above that of the tuned MLP (\amMlpTunedAuc). The ResNet's false-positive rate (\amResnetFpr) is lower than that of the other models, at a lower true-positive rate; the threshold-free AUC is lower. On this dataset the ResNet therefore shows no advantage over tree-based models in F1 or AUC. The authors make a similar remark: ``the performance advantages of'' DLBAC ``are not apparent in the Amazon datasets'' (Sec.~5.2.1).
+
+\begin{table}[t]
+\centering\footnotesize
+\input{generated/tab_amazon.tex}
+\caption{amazon1 on the authors' split (mean over five seeds). \emph{Published F1}: read off the figures of \cite{nobi2022}. \emph{All-allow}: a classifier that allows every request. AUC is not defined for the SVM (hard decisions) and is averaged over the seeds in which a model outputs more than two distinct values (two of five for the default MLP, which allows nearly everything). Published F1 values are read off figures (resolution about 0.015).}
+\label{tab:amazon}
+\end{table}
+
+\subsection{The split}
+On the authors' split, \overlapMin\% to \overlapMax\% of the test tuples (depending on the dataset) involve a user and a resource that both occur in the training file. The other \unseenMin\% to \unseenMax\% involve an unseen user or resource, so the split measures mostly how well a model handles known users and known resources and tests unseen ones only weakly. Section~\ref{sec:arch} uses a different split for that.
+
+\paragraph{Conclusion.} The benchmark's rules include constraints that compare user and resource attributes, and the ResNet's lead is consistent with that. Generic equality indicators raise every classical family on all eight datasets, remove the ResNet's lead over the paper's default random forest, and put each tuned family above the authors' ResNet (significantly for GB and SVM after adjustment); the default MLP and SVM need the encoding and tuning of Section~\ref{sec:baselines} as well. On amazon1, where there are no such constraints, the ResNet has no advantage over tree-based models in F1 or AUC, although amazon1 differs from the synthetic data in other ways too. The ResNet's lead on the synthetic benchmark is therefore consistent with its dependence on how well a model can express user-resource equality. The authors' split also tests generalisation to unseen entities only weakly; Section~\ref{sec:arch} does it directly.
+
+\section{Q3: does the advantage come from the architecture?}\label{sec:arch}
+
+\subsection{Against relation-blind models}
+Without indicators, the ResNet is not significantly different from tuned MLP, SVM and GB (Table~\ref{tab:ladder}). On raw metadata the architecture is therefore not clearly stronger than these models, and it is ahead of a tuned RF by \dRfTuned{} ($p=\pRfTuned$ unadjusted, \hRfTuned{} after adjustment).
+
+\subsection{The output layer}
+The authors' network ends in one linear layer. If the convolutional layers already produce features from which an equality can be read, a single linear layer may be unable to combine them. We test this with the hidden-layer variant of Section~\ref{sec:additions}. A hidden layer raises F1 from \fResnet{} to \fResnetHead{}, by \vHeadVsResnet{} on \vwHeadVsResnet{} of 8 datasets ($p$ \vpHeadVsResnet); with the indicators on both sides the gain is \vHeadEqVsEq{} on \vwHeadEqVsEq{} of 8. Adding the 64 indicators on top changes it by \vIndicatorsOnHeadU{} to four decimals ($p=\vpIndicatorsOnHead$): with a hidden layer the network does not need them (Table~\ref{tab:head}).
+
+\begin{table}[t]
+\centering\footnotesize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Comparison & Difference & Datasets won & $p$ \\
+\midrule
+ResNet + hidden layer, minus ResNet & \vHeadVsResnet & \vwHeadVsResnet{} of 8 & \vpHeadVsResnet \\
+\; with indicators, minus without (hidden layer) & \vIndicatorsOnHead & \vwIndicatorsOnHead{} of 8 & \vpIndicatorsOnHead \\
+\; with indicators, minus without (authors' head) & \vIndicatorsOnResnet & \vwIndicatorsOnResnet{} of 8 & \vpIndicatorsOnResnet \\
+ResNet + hidden layer + indicators, minus ResNet + indicators & \vHeadEqVsEq & \vwHeadEqVsEq{} of 8 & \vpHeadEqVsEq \\
+\midrule
+ResNet + hidden layer, minus RF + indicators & \vHeadVsRfEq & \vwHeadVsRfEq{} of 8 & \vpHeadVsRfEq \\
+ResNet + hidden layer, minus MLP + indicators & \vHeadVsMlpEq & \vwHeadVsMlpEq{} of 8 & \vpHeadVsMlpEq \\
+ResNet + hidden layer, minus GB + indicators & \vHeadVsGbEq & \vwHeadVsGbEq{} of 8 & \vpHeadVsGbEq \\
+ResNet + hidden layer, minus SVM + indicators & \vHeadVsSvmEq & \vwHeadVsSvmEq{} of 8 & \vpHeadVsSvmEq \\
+\bottomrule
+\end{tabular}
+\caption{The hidden-layer ResNet (F1 differences; unadjusted paired $t$-test over the eight datasets). The tuned classical models in the lower block are those with indicators.}
+\label{tab:head}
+\end{table}
+
+On the authors' split, the hidden-layer ResNet is not significantly different from the equality-aware MLP and RF, below the equality-aware SVM, and below GB by a difference that is not significant (lower block of Table~\ref{tab:head}). So one change to the output layer moves the ResNet from behind all four equality-aware families to not significantly different from two of them. On held-out users and resources it does not (next subsection).
+
+\paragraph{Explanation, and its limit.} On the authors' split the result suggests that the convolutional layers already carry what the indicators provide, and that the authors' linear output layer cannot use it. The hidden layer adds depth, parameters and non-linearity at once. We did not run a control that adds parameters without non-linearity, so we do not say which of the three matters.
+
+\subsection{Users and resources held out of training}
+The paper states that policies or models with a higher F1 score ``can make more accurate access control decisions on users and resources with attributes not explicitly seen during the mining (or training) process'' (Sec.~5.1) and, in the introduction, that DLBAC generalises ``well to situations that were not seen during training time''. The authors' split tests this only weakly (Section~\ref{sec:labels}), so we built one. For each dataset we pool the authors' train and test files, hold out a random 20\% of the user ids and 20\% of the resource ids, and train on tuples whose user and resource are both kept, setting aside a random 15\% of those as a warm test set. The other test sets are \emph{user-cold} (held-out user, seen resource), \emph{resource-cold}, and \emph{both-cold}. We use three split seeds, which are also the model seeds.
+
+\begin{table}[t]
+\centering\footnotesize
+\input{generated/tab_cold.tex}
+\caption{F1 on the hold-out splits (mean over eight datasets and three split seeds). Compare models within a column. A model's drop between columns reflects the entities and also the different tuples in each set, so compare drops across models rather than reading one drop as the effect of unseen entities.}
+\label{tab:cold}
+\end{table}
+
+Table~\ref{tab:cold} shows the result and Table~\ref{tab:coldcmp} the comparisons. Both unseen lowered F1 for every model. Tuned RF and SVM lose the most from the warm test set to the both-cold set (\dropRfTuned{} and \dropSvmTuned{}), GB (\dropGbTuned{}), the tuned MLP and the authors' ResNet (\dropMlpTuned{} and \dropResnet{}) and the hidden-layer ResNet (\dropResnetHead{}) less. RF, GB and MLP with indicators lose least (\dropRfTunedEq{}, \dropGbTunedEq{} and \dropMlpTunedEq{}); SVM with indicators loses \dropSvmTunedEq{}, about as much as the ResNets.
+
+\begin{table}[t]
+\centering\footnotesize
+\input{generated/tab_cold_cmp.tex}
+\caption{Differences in F1 on the hold-out splits (mean over eight datasets and three split seeds). In brackets: the unadjusted paired $t$-test $p$ over the datasets, then the Holm-adjusted $p$ over all \nColdTests{} tests in the table.}
+\label{tab:coldcmp}
+\end{table}
+
+The authors' ResNet is ahead of tuned RF on all three cold sets (unadjusted $p\le\coldResRfUnadjMax$; adjusted \coldResRfAdjMin{} to \coldResRfAdjMax) and of tuned SVM on two of them on the unadjusted test (adjusted \coldResSvmAdjMin{} to \coldResSvmAdjMax), and it is not significantly different from tuned GB and MLP. The equality-aware classical models are ahead of the authors' ResNet in every condition, by \cdSvmTunedEqUserColdU{} to \cdGbTunedEqBothColdU{} F1: all \coldAwareN{} comparisons are significant on the unadjusted test and \coldAwareAdj{} after adjustment. The hidden-layer ResNet closes part of that gap but still trails the equality-aware RF, GB and MLP in the point estimates, by \chdGbTunedEqResourceColdU{} to \chdGbTunedEqBothColdU{} (all \coldHeadN{} comparisons are significant on the unadjusted test, \coldHeadAdj{} after adjustment), and it is not significantly different from the equality-aware SVM.
+
+So on held-out ids we see no advantage specific to the architecture: the ResNet is ahead of some relation-blind models and not significantly different from others, and classical models that are given the relation are ahead of it. A limit: we hold out ids, not attribute values, so a held-out user can still share all its attribute values with training users. The paper's wording is about attributes not seen.
+
+\paragraph{Conclusion.} As the authors configured it, the ResNet is not significantly different from the tuned MLP, SVM and GB and gains only \vIndicatorsOnResnetU{} F1 from the indicators. One hidden layer in its output head adds \vHeadVsResnetU{} F1 on all eight datasets (\vHeadEqVsEqU{} when both versions have the indicators) and, on the authors' split, takes it to \fResnetHead{}, a level not significantly different from the equality-aware MLP and RF (\fMlpTunedEq{} and \fRfTunedEq{}) and below the equality-aware GB and SVM (\fGbTunedEq{} and \fSvmTunedEq{}). On held-out users and resources it still trails the equality-aware RF, GB and MLP in the point estimates, and its advantage over relation-blind models appears only against RF and SVM, on the unadjusted test. We therefore find no evidence of an architecture-specific advantage. We did not separate depth, parameters and non-linearity in the hidden-layer change.
+
+\section{Discussion and limits}
+
+\paragraph{What the evidence supports.} On this benchmark the ResNet's lead reflects the default configuration of the baselines and the equality structure of the labels more than the architecture. The ResNet works from raw metadata and, with one change to its head, is on the authors' split not significantly different from the equality-aware MLP and random forest; on held-out users and resources it still trails them in the point estimates. What the evidence does not support, on this benchmark, is the statement that deep learning outperforms classical machine learning, taken as a statement about architecture.
+
+\paragraph{Limits.}
+\begin{itemize}[itemsep=2pt]
+\item One generator and eight datasets, with rules whose constraints compare user and resource attributes; real policies may differ. The only real-world control is amazon1, one dataset on which F1 is uninformative; it differs from the synthetic data in more than the absence of equality constraints (real access decisions, one operation, about 94\% allows), so it shows that the ResNet has no advantage there, not what causes its advantage on the synthetic data.
+\item Where the published text and the released code differ (Section~\ref{sec:text-code}), we followed the code.
+\item Our reproduction is not exact: \reproWithin{} of \reproCells{} cells are within \reproTol{} (Table~\ref{tab:repro}). The baselines' input encodings are inferred, and we did not examine the paper's statement about the 28k dataset.
+\item The tuned classical models received a 12-configuration search and the ResNet none. MLP and SVM changed encoding and tuning together.
+\item The hidden layer changes depth, parameters and non-linearity together. We did not run a linear two-layer control.
+\item The hold-out splits remove ids, not attribute values. \emph{Not significantly different} is not equivalence: with eight datasets our equivalence tests were inconclusive for the comparisons of the ResNet with the tuned MLP, SVM and GB (Section~\ref{sec:baselines}). The hold-out comparisons are reported unadjusted and Holm-adjusted; several are significant only unadjusted.
+\item Not tested: policy-mining baselines, other network architectures, the depth-56 networks against the authors' weights, distillation, interpretation methods.
+\end{itemize}
+
+\paragraph{Other work.} To our knowledge, a few papers compare DLBAC-style networks with tree models. Lan et al.\ \cite{lan2024} report DLBAC ahead of XGBoost on six of the eight synthetic datasets and behind on the two smallest (values read from a figure). Tyagi et al.\ \cite{tyagi2024} report XGBoost above a ResNet on all eight synthetic datasets, with a different split and encoding, and on amazon1 an F1 of 0.9720 for XGBoost, 0.9732 for a random forest and 0.9696 for a ResNet. Llamas et al.\ \cite{llamas2025} report a random forest above a ResNet on the Kaggle Amazon data, with oversampling of the deny class and a ResNet of depth 10, and Bui and Panda \cite{bui2025} report tree-based classifiers on word-embedded attribute values above DLBAC on subsets of the UCI Amazon data. Grinsztajn et al.\ \cite{grinsztajn2022} study why tree-based models still outperform deep learning on typical tabular data.
+
+\section{Reproducibility}
+The repository \repo{} contains the code, the stored result of every run (\nCells{} result cells), the job lists, the scripts that produce the numbers and result tables of this paper (Tables~\ref{tab:claims} and~\ref{tab:textcode} are written by hand), and a \repofile{CLAUDE.md} that guides an LLM assistant through reproducing them (see also the \repofile{README.md}). The code is released under the MIT licence. The authors' repository enters as a git submodule pinned to the commit we used; none of its files are copied. There are three levels: regenerate every table and number from the stored results (seconds); a smoke test and the port check (about a minute); and the full runs (hundreds of hours of job time). The stored ResNets used the PyTorch \texttt{mps} backend; re-running one stored cell on the same backend reproduced its outputs exactly, and other devices are untested for the full runs.
+
+\appendix
+\section{Per-dataset results}
+Mean over five seeds. Columns are the datasets (11k to 32k); the last column is the mean.
+\begin{table}[h]
+\centering\scriptsize\setlength{\tabcolsep}{3pt}
+\input{generated/tab_app_f1.tex}
+\caption{F1.}
+\end{table}
+\begin{table}[h]
+\centering\scriptsize\setlength{\tabcolsep}{3pt}
+\input{generated/tab_app_fpr.tex}
+\caption{False-positive rate.}
+\end{table}
+\begin{table}[h]
+\centering\scriptsize\setlength{\tabcolsep}{3pt}
+\input{generated/tab_app_tpr.tex}
+\caption{True-positive rate.}
+\end{table}
+\begin{table}[h]
+\centering\scriptsize\setlength{\tabcolsep}{3pt}
+\input{generated/tab_app_precision.tex}
+\caption{Precision.}
+\end{table}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+\end{document}

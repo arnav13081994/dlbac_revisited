@@ -1,0 +1,15 @@
+E6, authors' split: mean F1 over datasets: resnet 0.9398, svm_theirs 0.7729, svm_tuned 0.9338, svm_tuned_eq 0.9541, mlp_tuned 0.9380, mlp_tuned_eq 0.9475
+
+FAMILY (2 comparisons, Holm), margin 0.01 F1 [difference, 95% bootstrap CI, ResNet wins]
+ResNet minus svm_tuned             +0.0060 [-0.0026, +0.0145] 5/8  p_diff(Holm) 0.234  TOST(Holm) 0.416  non-inferior no   inconclusive           equiv@x0.5 n @x2.0 Y
+ResNet minus svm_tuned_eq          -0.0143 [-0.0174, -0.0112] 0/8  p_diff(Holm) 0.000  TOST(Holm) 0.982  non-inferior yes  comparator better      equiv@x0.5 n @x2.0 Y
+
+E6, cold splits: mean F1 over datasets: user_cold: resnet 0.9383, svm_tuned 0.9265, svm_tuned_eq 0.9508; resource_cold: resnet 0.9263, svm_tuned 0.9027, svm_tuned_eq 0.9417; both_cold: resnet 0.9184, svm_tuned 0.8907, svm_tuned_eq 0.9374
+
+FAMILY, cold splits (6 comparisons, Holm), margin 0.02 F1 (sensitivity x0.5 = 0.01, x1.5 = 0.03)
+user_cold: ResNet minus svm_tuned  +0.0118 [+0.0011, +0.0225] 6/8  p_diff(Holm) 0.091  TOST(Holm) 0.486  non-inferior no   inconclusive           equiv@x0.5 n @x1.5 Y
+user_cold: ResNet minus svm_tuned_eq -0.0125 [-0.0195, -0.0066] 0/8  p_diff(Holm) 0.041  TOST(Holm) 0.229  non-inferior yes  comparator better      equiv@x0.5 n @x1.5 Y
+resource_cold: ResNet minus svm_tuned +0.0236 [+0.0063, +0.0420] 5/8  p_diff(Holm) 0.091  TOST(Holm) 1.000  non-inferior no   inconclusive           equiv@x0.5 n @x1.5 n
+resource_cold: ResNet minus svm_tuned_eq -0.0154 [-0.0218, -0.0099] 0/8  p_diff(Holm) 0.011  TOST(Holm) 0.486  non-inferior yes  comparator better      equiv@x0.5 n @x1.5 Y
+both_cold: ResNet minus svm_tuned  +0.0276 [+0.0092, +0.0469] 6/8  p_diff(Holm) 0.091  TOST(Holm) 1.000  non-inferior no   inconclusive           equiv@x0.5 n @x1.5 n
+both_cold: ResNet minus svm_tuned_eq -0.0190 [-0.0248, -0.0132] 0/8  p_diff(Holm) 0.004  TOST(Holm) 1.000  non-inferior yes  comparator better      equiv@x0.5 n @x1.5 Y

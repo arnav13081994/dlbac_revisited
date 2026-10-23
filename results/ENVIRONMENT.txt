@@ -1,0 +1,14 @@
+Environment of the stored results (versions as installed when they were produced).
+
+Python 3.12.15
+numpy 2.5.4
+pandas 3.0.6
+scikit-learn 1.9.1
+scipy 1.18.1
+torch 2.14.1
+joblib 1.6.0
+threadpoolctl 3.7.0
+h5py 3.16.0   (only for the port check, make e2)
+
+Device used for every ResNet in results/: --device mps (PyTorch Metal backend). The classical models ran on the CPU with one thread each.
+Other devices (cpu, cuda) have not been used for the full runs; `make smoke` and `make e2` have been run on cpu.

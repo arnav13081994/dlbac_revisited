@@ -1,0 +1,61 @@
+E1: 40 (dataset, seed) cells; seeds per dataset: [5, 5, 5, 5, 5, 5, 5, 5]; models: ['gb_tuned', 'gb_tuned_eq', 'mlp_raw_theirs', 'mlp_tuned', 'mlp_tuned_eq', 'resnet', 'resnet_eq', 'rf_theirs', 'rf_tuned', 'rf_tuned_eq', 'svm_theirs']
+
+F1, mean over seeds, paper protocol
+dataset                 gb_tuned   gb_tuned_eq mlp_raw_their     mlp_tuned  mlp_tuned_eq        resnet     resnet_eq     rf_theirs      rf_tuned   rf_tuned_eq    svm_theirs
+u4k-r4k-auth11k            0.989         0.993         0.889         0.987         0.992         0.982         0.982         0.979         0.979         0.993         0.859
+u5k-r5k-auth12k            0.997         0.998         0.880         0.998         0.999         0.988         0.989         0.989         0.990         0.998         0.814
+u5k-r5k-auth19k            0.945         0.963         0.845         0.938         0.951         0.947         0.947         0.918         0.925         0.957         0.764
+u4k-r4k-auth21k            0.933         0.966         0.845         0.943         0.958         0.954         0.955         0.900         0.902         0.965         0.758
+u4k-r7k-auth20k            0.917         0.933         0.804         0.922         0.939         0.924         0.925         0.887         0.888         0.917         0.740
+u4k-r4k-auth22k            0.883         0.907         0.793         0.874         0.878         0.882         0.883         0.858         0.868         0.891         0.797
+u4k-r6k-auth28k            0.880         0.910         0.711         0.893         0.904         0.882         0.883         0.865         0.873         0.906         0.668
+u6k-r6k-auth32k            0.947         0.966         0.860         0.949         0.959         0.959         0.958         0.925         0.931         0.963         0.784
+mean                       0.936         0.954         0.828         0.938         0.948         0.940         0.940         0.915         0.920         0.949         0.773
+
+FPR, mean over seeds, paper protocol
+dataset                 gb_tuned   gb_tuned_eq mlp_raw_their     mlp_tuned  mlp_tuned_eq        resnet     resnet_eq     rf_theirs      rf_tuned   rf_tuned_eq    svm_theirs
+u4k-r4k-auth11k            0.010         0.008         0.094         0.013         0.008         0.019         0.020         0.016         0.015         0.006         0.123
+u5k-r5k-auth12k            0.003         0.003         0.101         0.002         0.002         0.013         0.013         0.008         0.007         0.002         0.157
+u5k-r5k-auth19k            0.041         0.031         0.121         0.047         0.037         0.041         0.041         0.058         0.054         0.036         0.163
+u4k-r4k-auth21k            0.072         0.046         0.159         0.061         0.045         0.051         0.050         0.109         0.104         0.046         0.255
+u4k-r7k-auth20k            0.072         0.065         0.169         0.067         0.050         0.065         0.064         0.096         0.095         0.075         0.209
+u4k-r4k-auth22k            0.195         0.153         0.292         0.176         0.164         0.161         0.163         0.227         0.214         0.169         0.446
+u4k-r6k-auth28k            0.100         0.070         0.250         0.096         0.081         0.106         0.105         0.112         0.101         0.076         0.256
+u6k-r6k-auth32k            0.063         0.031         0.151         0.054         0.043         0.041         0.041         0.089         0.080         0.036         0.272
+mean                       0.069         0.051         0.167         0.065         0.054         0.062         0.062         0.089         0.084         0.056         0.235
+
+TPR, mean over seeds, paper protocol
+dataset                 gb_tuned   gb_tuned_eq mlp_raw_their     mlp_tuned  mlp_tuned_eq        resnet     resnet_eq     rf_theirs      rf_tuned   rf_tuned_eq    svm_theirs
+u4k-r4k-auth11k            0.991         0.995         0.892         0.990         0.994         0.987         0.987         0.977         0.977         0.994         0.867
+u5k-r5k-auth12k            0.997         0.999         0.877         0.998         1.000         0.992         0.993         0.987         0.988         0.999         0.809
+u5k-r5k-auth19k            0.945         0.966         0.848         0.938         0.951         0.948         0.949         0.914         0.923         0.963         0.751
+u4k-r4k-auth21k            0.939         0.980         0.850         0.949         0.963         0.961         0.961         0.909         0.910         0.976         0.771
+u4k-r7k-auth20k            0.916         0.939         0.800         0.921         0.934         0.922         0.923         0.884         0.884         0.918         0.725
+u4k-r4k-auth22k            0.899         0.919         0.794         0.874         0.874         0.880         0.882         0.873         0.883         0.900         0.873
+u4k-r6k-auth28k            0.873         0.901         0.706         0.892         0.899         0.882         0.882         0.857         0.861         0.898         0.644
+u6k-r6k-auth32k            0.954         0.963         0.866         0.951         0.959         0.958         0.957         0.935         0.939         0.961         0.816
+mean                       0.939         0.958         0.829         0.939         0.947         0.941         0.942         0.917         0.921         0.951         0.782
+
+precision, mean over seeds, paper protocol
+dataset                 gb_tuned   gb_tuned_eq mlp_raw_their     mlp_tuned  mlp_tuned_eq        resnet     resnet_eq     rf_theirs      rf_tuned   rf_tuned_eq    svm_theirs
+u4k-r4k-auth11k            0.988         0.991         0.886         0.984         0.990         0.977         0.976         0.980         0.982         0.993         0.852
+u5k-r5k-auth12k            0.996         0.996         0.883         0.997         0.998         0.985         0.986         0.990         0.992         0.998         0.819
+u5k-r5k-auth19k            0.946         0.959         0.841         0.938         0.951         0.946         0.946         0.922         0.927         0.952         0.777
+u4k-r4k-auth21k            0.927         0.954         0.839         0.938         0.954         0.948         0.949         0.890         0.895         0.954         0.746
+u4k-r7k-auth20k            0.919         0.927         0.808         0.924         0.943         0.927         0.928         0.891         0.892         0.916         0.754
+u4k-r4k-auth22k            0.866         0.894         0.793         0.875         0.883         0.885         0.884         0.844         0.853         0.882         0.734
+u4k-r6k-auth28k            0.887         0.920         0.717         0.894         0.910         0.883         0.883         0.873         0.885         0.914         0.693
+u6k-r6k-auth32k            0.939         0.970         0.853         0.947         0.958         0.960         0.960         0.915         0.923         0.965         0.753
+mean                       0.934         0.951         0.828         0.937         0.948         0.939         0.939         0.913         0.919         0.947         0.766
+
+PRE-SPECIFIED FAMILY (10 comparisons, Holm), margin 0.01 F1 [difference, 95% bootstrap CI, ResNet wins, tests]
+ResNet minus rf_theirs             +0.0247 [+0.0130, +0.0368] 7/8  p_diff(Holm) 0.045  TOST(Holm) 1.000  non-inferior no   ResNet better          equiv@x0.5 n @x2.0 n
+ResNet minus svm_theirs            +0.1669 [+0.1381, +0.1914] 8/8  p_diff(Holm) 0.000  TOST(Holm) 1.000  non-inferior no   ResNet better          equiv@x0.5 n @x2.0 n
+ResNet minus mlp_raw_theirs        +0.1116 [+0.0979, +0.1307] 8/8  p_diff(Holm) 0.000  TOST(Holm) 1.000  non-inferior no   ResNet better          equiv@x0.5 n @x2.0 n
+ResNet minus rf_tuned              +0.0202 [+0.0092, +0.0325] 7/8  p_diff(Holm) 0.092  TOST(Holm) 1.000  non-inferior no   inconclusive           equiv@x0.5 n @x2.0 n
+ResNet minus gb_tuned              +0.0034 [-0.0027, +0.0102] 5/8  p_diff(Holm) 0.729  TOST(Holm) 0.422  non-inferior no   inconclusive           equiv@x0.5 n @x2.0 Y
+ResNet minus mlp_tuned             +0.0018 [-0.0042, +0.0075] 5/8  p_diff(Holm) 0.729  TOST(Holm) 0.166  non-inferior no   inconclusive           equiv@x0.5 n @x2.0 Y
+ResNet minus rf_tuned_eq           -0.0091 [-0.0148, -0.0031] 1/8  p_diff(Holm) 0.115  TOST(Holm) 1.000  non-inferior yes  inconclusive           equiv@x0.5 n @x2.0 Y
+ResNet minus gb_tuned_eq           -0.0147 [-0.0201, -0.0101] 0/8  p_diff(Holm) 0.008  TOST(Holm) 1.000  non-inferior yes  comparator better      equiv@x0.5 n @x2.0 n
+ResNet minus mlp_tuned_eq          -0.0077 [-0.0133, -0.0024] 2/8  p_diff(Holm) 0.147  TOST(Holm) 1.000  non-inferior yes  inconclusive           equiv@x0.5 n @x2.0 Y
+ResNet+eq minus ResNet             +0.0005 [+0.0000, +0.0009] 6/8  p_diff(Holm) 0.212  TOST(Holm) 0.000  non-inferior yes  equivalent             equiv@x0.5 Y @x2.0 Y

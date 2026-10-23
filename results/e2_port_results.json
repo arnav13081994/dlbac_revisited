@@ -1,0 +1,44 @@
+{
+ "weights": "vendor/DlbacAlpha/neural_network_training/results/dlbac_alpha.hdf5",
+ "dataset": "u4k-r4k-auth11k",
+ "n_test": 2192,
+ "input_grid": [
+  16,
+  132
+ ],
+ "models": {
+  "tf_same": {
+   "tn": 4746,
+   "fp": 87,
+   "fn": 50,
+   "tp": 3885,
+   "precision": 0.9780966767371602,
+   "tpr": 0.9872935196950444,
+   "fpr": 0.018001241464928614,
+   "f1": 0.9826735803718224,
+   "acc": 0.984375
+  },
+  "symmetric": {
+   "tn": 2841,
+   "fp": 1992,
+   "fn": 2495,
+   "tp": 1440,
+   "precision": 0.4195804195804196,
+   "tpr": 0.36594663278271916,
+   "fpr": 0.4121663563004345,
+   "f1": 0.3909325369892765,
+   "acc": 0.4882527372262774
+  }
+ },
+ "agreement_tf_vs_symmetric": 0.48950729927007297,
+ "max_abs_prob_diff_tf_vs_symmetric": 1.0,
+ "authors_counts": {
+  "tn": 4746,
+  "fp": 87,
+  "fn": 50,
+  "tp": 3885
+ },
+ "count_l1_difference_tf_same": 0,
+ "pass_at_most_9_decisions": true,
+ "count_l1_difference_symmetric": 8700
+}

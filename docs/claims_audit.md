@@ -1,0 +1,37 @@
+# Claims audit
+
+Which statements of Nobi, Krishnan, Huang, Shakarami and Sandhu, "Toward Deep Learning Based Access Control" (arXiv:2203.15124v1; CODASPY 2022, pp. 143-154) we looked at, which of the three questions each belongs to, and what the stored results say. Quotes are verbatim from the arXiv v1 text; section numbers are that version's (they are not yet checked against the published CODASPY text). Numbers come from `paper/generated/` (made by `make report`); F1 is pooled over the four operations at threshold 0.5, as in the DLBAC paper.
+
+The three questions: does the ResNet advantage on this benchmark reflect **Q1** the baseline configuration, **Q2** the structure of the benchmark's labels, or **Q3** the architecture?
+
+Tested: one or more of our experiments bears on the statement. Not tested: we ran nothing that bears on it, which says nothing about whether it holds.
+
+## Tested
+
+| # | Claim (verbatim) | Section | Q | What the stored results show |
+| --- | --- | --- | --- | --- |
+| 1 | "deep learning based algorithms generally perform better than traditional ML and MLP techniques" | 5.1 | Q1, Q2 | Against the default-configuration RF, MLP and SVM the ResNet is ahead (F1 0.9398 against 0.9151, 0.8283, 0.7729). Against tuned one-hot MLP, SVM and gradient boosting the differences are +0.0018, +0.0060 and +0.0034 (not significant; our equivalence tests at margin 0.01 were inconclusive, so no equivalence is claimed). With 64 generic equality indicators added, the paper's own default random forest is not significantly different from the ResNet (-0.0022, p = 0.402), the default MLP and SVM stay behind it (+0.0316, +0.0243), and every tuned family is above it (gradient boosting and SVM significantly, after Holm adjustment over 14 comparisons). |
+| 2 | "DLBACα instances achieved the highest F1 score, while SVM and MLP performed the worst" | 5.2.1 | Q1 | Reproduced with the default configurations: MLP 0.8283 and SVM 0.7729 are the lowest. With a one-hot encoding and a 12-configuration search the MLP reaches 0.9380 and the SVM 0.9338. |
+| 3 | "the instances of DLBACα's improvements over RF are significant (for p-value < 0.05; paired T-test (not shown here)) for all the synthetic datasets except u5k-r5k-auth12k dataset" | 5.2.1 | Q1 | The paper does not say what the test is paired over, so the per-dataset test is not repeated. Only the pooled difference is reproduced: across the eight datasets the ResNet is ahead of the default-configuration RF by +0.0247 F1 (7 of 8 datasets, paired t-test p = 0.006, Holm-adjusted 0.064). The per-dataset differences are -0.001 on 12k and +0.003 on 11k and +0.017 to +0.054 on the other six. The same comparison with a tuned RF is +0.0202 (p = 0.015, Holm-adjusted 0.123); the Holm adjustment is over the 14 comparisons of paper Table 4. |
+| 3b | "DLBACα instances report 0.03 to 0.09 improvements over RF as shown in the figure" (about the datasets "with a large number of authorization tuples") | 5.2.1 | Q1 | Our per-dataset differences for the six larger datasets are +0.017 to +0.054 (see 3). |
+| 4 | "DLBACα instances show the lowest variation in its performance across the datasets, implying that DLBACα is most robust against changes in data characteristics" | 5.2.1 | Q1 | Standard deviation of the per-dataset F1 over the eight datasets: ResNet 0.041; default RF 0.048, MLP 0.058, SVM 0.057; tuned MLP 0.042, gradient boosting 0.043, SVM 0.043, RF 0.046; with indicators 0.035 to 0.041 (gradient boosting 0.035). The authors' ResNet has the lowest spread among the classical-model baselines without indicators (by 0.001 to 0.002 over the tuned MLP, gradient boosting and SVM), and not among the classical models with indicators. (`paper/generated/spread.csv`) |
+| 6 | "DLBACα is more effective and robust than classical ML approaches, including MLP, for making accurate access decisions" | 5.2.1 | Q1, Q2, Q3 | Summary of 1, 2 and 4: holds against the default-configuration baselines; the tuned relation-blind baselines are not significantly different from the ResNet; the equality-aware classical models are ahead. |
+| 9 | "generalizing well to situations that were not seen during training time" (also "the engineered rules typically make poor access control decisions for user-resource metadata that were not explicitly seen by the mining process") | 1 | Q3 | With the entity-hold-out splits (E3, `paper/generated/tab_cold.tex`, `tab_cold_cmp.tex`) tuned RF and SVM lose most from the warm to the both-cold test set, RF, GB and MLP with the equality indicators lose least, and the authors' ResNet is ahead of tuned RF (and SVM on two of three sets) and not significantly different from tuned GB and MLP. The equality-aware classical models are ahead of the authors' ResNet in every condition (by 0.0125 to 0.0264 F1); the hidden-layer ResNet trails the equality-aware RF, GB and MLP by 0.007 to 0.012. We did not run rule-mining baselines, so the statement about engineered rules is not tested. On the authors' own split 72% to 94% of the test tuples involve a user and a resource that both occur in training. |
+| 12 | "As DLBAC learns based on metadata, it obviates the need for attribute/role engineering, policy engineering, etc." | 8 | Q2, Q3 | The ResNet with a hidden layer in its output head needs no hand-made relational feature (the 64 indicators add -0.0000 to it); the authors' network gains +0.0005 from them and trails the classical models that have them. The classical models do gain from them (+0.0095 to +0.0293). The ResNet with a hidden-layer head (0.9500) matches the equality-aware MLP and RF (0.9475, 0.9489) and is slightly below the equality-aware gradient boosting and SVM (0.9545, 0.9541). |
+| 13 | "While the performance advantages of DLBACα are not apparent in the Amazon datasets ..." | 5.2.1 | Q2 | Agrees for amazon1 (`results/h1`): the ResNet's AUC is 0.8149 against 0.8653 (tuned RF), 0.8524 (default RF) and 0.8461 (tuned GB), and every model's F1 is within 0.005 of the all-allow value 0.9695. The UCI set, amazon2 and amazon3 were not used. |
+
+## Not assessed
+
+| # | Claim (verbatim) | Section | Why not |
+| --- | --- | --- | --- |
+| 5 | "Except for the u4k-r6k-auth28k dataset, all algorithms' performances drop with the increase of hidden metadata" | 5.2.1 | We did not investigate it. Our reproduction table shows our ResNet on u4k-r6k-auth28k at 0.882 against 0.957 in the paper's figure, the one ResNet cell outside the tolerance; we state it without an explanation. |
+
+## Not tested
+
+| # | Claim (verbatim) | Section | Note |
+| --- | --- | --- | --- |
+| 7 | "DLBAC is agnostic to deep neural network architecture, and we will show that the deep learning-based model's performance is consistent across datasets" | 5.1 | Only the ResNet was run. |
+| 8 | "A deep learning based approach can make more accurate access control decisions and generalize better. The F1 score of EPDE-ML and DLBACα instances are significantly better than the rule-based approaches such as XuStoller and Rhapsody" | 5.2.2 | No policy-mining baseline was run. |
+| 10 | "a neural network's generalization ability is likely to be transferred to a decision tree through a method called distillation" | 6.2 | Distillation was not run. |
+| 11 | "the generated decision tree will give an approximate explanation of the underlying logic of DLBACα" | 6.2 | Not run. |
+| 14 | Integrated Gradients "is an effective interpretation technique" | 6.1 | Not run. |

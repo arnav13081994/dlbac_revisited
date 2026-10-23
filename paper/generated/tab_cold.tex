@@ -1,0 +1,18 @@
+\begin{tabular}{lrrrr}
+\toprule
+Model & Warm & User-cold & Resource-cold & Both-cold \\
+\midrule
+RF, tuned & 0.9128 & 0.9158 & 0.8880 & 0.8782 \\
+GB, tuned & 0.9296 & 0.9308 & 0.9143 & 0.9063 \\
+MLP, tuned (one-hot) & 0.9301 & 0.9386 & 0.9230 & 0.9162 \\
+SVM, tuned (one-hot) & 0.9272 & 0.9265 & 0.9027 & 0.8907 \\
+\midrule
+ResNet (authors' recipe) & 0.9351 & 0.9383 & 0.9263 & 0.9184 \\
+ResNet, hidden-layer head & 0.9461 & 0.9465 & 0.9401 & 0.9330 \\
+\midrule
+RF, tuned + indicators & 0.9479 & 0.9553 & 0.9471 & 0.9444 \\
+GB, tuned + indicators & 0.9525 & 0.9545 & 0.9468 & 0.9448 \\
+MLP, tuned + indicators & 0.9465 & 0.9541 & 0.9471 & 0.9440 \\
+SVM, tuned + indicators & 0.9513 & 0.9508 & 0.9417 & 0.9374 \\
+\bottomrule
+\end{tabular}

@@ -1,0 +1,35 @@
+{
+ "weights": "vendor/DlbacAlpha/decision_engine/neural_network/dlbac_alpha.hdf5",
+ "dataset": "u4k-r4k-auth11k",
+ "n_test": 2192,
+ "input_grid": [
+  16,
+  132
+ ],
+ "models": {
+  "tf_same": {
+   "tn": 4745,
+   "fp": 88,
+   "fn": 55,
+   "tp": 3880,
+   "precision": 0.9778225806451613,
+   "tpr": 0.9860228716645489,
+   "fpr": 0.018208152286364576,
+   "f1": 0.9819056054662786,
+   "acc": 0.983690693430657
+  },
+  "symmetric": {
+   "tn": 2714,
+   "fp": 2119,
+   "fn": 2203,
+   "tp": 1732,
+   "precision": 0.4497533108283563,
+   "tpr": 0.44015247776365946,
+   "fpr": 0.4384440306228016,
+   "f1": 0.44490110454662213,
+   "acc": 0.5070711678832117
+  }
+ },
+ "agreement_tf_vs_symmetric": 0.5067290145985401,
+ "max_abs_prob_diff_tf_vs_symmetric": 0.9999992251396179
+}

@@ -1,0 +1,29 @@
+{
+ "exp": "layout",
+ "ds": "u4k-r4k-auth11k",
+ "seed": 3,
+ "group": "resnet",
+ "tiny": false,
+ "protocol": "paper (released-code columns)",
+ "torch": "2.14.1",
+ "cond": "fields",
+ "model": "resnet",
+ "n_train": 8772,
+ "n_test": 2192,
+ "models": {
+  "resnet8": {
+   "tn": 4722,
+   "fp": 111,
+   "fn": 55,
+   "tp": 3880,
+   "precision": 0.9721874216988223,
+   "tpr": 0.9860228716645489,
+   "fpr": 0.022967101179391682,
+   "f1": 0.9790562705021448,
+   "acc": 0.9810675182481752,
+   "depth": 8,
+   "epochs": 60,
+   "final_train_loss": 0.01004557922521561
+  }
+ }
+}

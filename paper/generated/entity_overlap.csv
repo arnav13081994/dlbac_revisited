@@ -1,0 +1,9 @@
+dataset,test_tuples,user_seen,resource_seen,both_seen
+u4k-r4k-auth11k,2192,0.825,0.784,0.726
+u5k-r5k-auth12k,2538,0.816,0.791,0.717
+u5k-r5k-auth19k,3907,0.937,0.900,0.861
+u4k-r4k-auth21k,4195,0.962,0.935,0.910
+u4k-r7k-auth20k,4006,0.968,0.844,0.830
+u4k-r4k-auth22k,4516,0.964,0.946,0.918
+u4k-r6k-auth28k,5750,0.981,0.917,0.904
+u6k-r6k-auth32k,6511,0.980,0.953,0.936

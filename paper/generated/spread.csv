@@ -1,0 +1,19 @@
+model,name,std_over_datasets
+gb_tuned_eq,"GB, tuned + indicators",0.0346
+svm_tuned_eq,"SVM, tuned + indicators",0.0370
+resnet_head,"ResNet, hidden-layer head",0.0376
+resnet_eq_head,"ResNet, hidden-layer head + indicators",0.0379
+rf_tuned_eq,"RF, tuned + indicators",0.0400
+resnet_eq,ResNet + indicators,0.0405
+mlp_tuned_eq,"MLP, tuned + indicators",0.0407
+resnet,ResNet (authors' recipe),0.0407
+mlp_tuned,"MLP, tuned (one-hot)",0.0422
+gb_tuned,"GB, tuned",0.0431
+svm_tuned,"SVM, tuned (one-hot)",0.0433
+rf_theirs_eq,"RF, default configuration + indicators",0.0446
+rf_tuned,"RF, tuned",0.0460
+rf_theirs,"RF, default configuration",0.0483
+svm_theirs,"SVM, default configuration",0.0565
+mlp_raw_theirs,"MLP, default configuration",0.0578
+mlp_raw_theirs_eq,"MLP, default configuration + indicators",0.0638
+svm_theirs_eq,"SVM, default configuration + indicators",0.0665

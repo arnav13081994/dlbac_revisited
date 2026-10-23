@@ -1,0 +1,3 @@
+# Only for the port check (make e2): it reads the authors' Keras weights file.
+-r requirements.txt
+h5py==3.16.0

@@ -1,0 +1,19 @@
+model,name,group,f1,std_over_seeds
+svm_theirs,"SVM, default configuration",default,0.7729,0.0000
+mlp_raw_theirs,"MLP, default configuration",default,0.8283,0.0055
+mlp_raw_theirs_eq,"MLP, default configuration + indicators",default + indicators,0.9082,0.0006
+rf_theirs,"RF, default configuration",default,0.9151,0.0002
+svm_theirs_eq,"SVM, default configuration + indicators",default + indicators,0.9155,0.0000
+rf_tuned,"RF, tuned",tuned,0.9196,0.0003
+svm_tuned,"SVM, tuned (one-hot)",tuned,0.9338,0.0003
+gb_tuned,"GB, tuned",tuned,0.9364,0.0003
+mlp_tuned,"MLP, tuned (one-hot)",tuned,0.9380,0.0015
+resnet,ResNet (authors' recipe),ResNet,0.9398,0.0008
+resnet_eq,ResNet + indicators,ResNet,0.9403,0.0006
+rf_theirs_eq,"RF, default configuration + indicators",default + indicators,0.9420,0.0002
+mlp_tuned_eq,"MLP, tuned + indicators",tuned + indicators,0.9475,0.0009
+rf_tuned_eq,"RF, tuned + indicators",tuned + indicators,0.9489,0.0002
+resnet_eq_head,"ResNet, hidden-layer head + indicators",ResNet,0.9499,0.0005
+resnet_head,"ResNet, hidden-layer head",ResNet,0.9500,0.0007
+svm_tuned_eq,"SVM, tuned + indicators",tuned + indicators,0.9541,0.0002
+gb_tuned_eq,"GB, tuned + indicators",tuned + indicators,0.9545,0.0004

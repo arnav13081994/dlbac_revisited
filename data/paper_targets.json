@@ -1,0 +1,199 @@
+{
+ "source": "Nobi, Krishnan, Huang, Shakarami, Sandhu, 'Toward Deep Learning Based Access Control', CODASPY 2022, arXiv:2203.15124v1, Figures 7-11 (line charts, no tables). Values READ OFF THE CHARTS by eye from the embedded images: resolution about +-0.01 to 0.015. amazon-kaggle = repo instance amazon1. EPDE-ML (Fig 8-11) coincides with RF (Fig 7). XuStoller and Rhapsody are not reproduced.",
+ "tolerance_prestated": {
+  "f1_tpr_precision_abs": 0.03,
+  "fpr_abs_synthetic": 0.03,
+  "fpr_abs_amazon": 0.1
+ },
+ "datasets": {
+  "amazon-kaggle": {
+   "ours": "amazon1",
+   "dlbac_r": {
+    "f1": 0.97,
+    "fpr": 0.63,
+    "tpr": 0.975,
+    "precision": 0.96
+   },
+   "rf": {
+    "f1": 0.973,
+    "fpr": 0.645
+   },
+   "svm": {
+    "f1": 0.97
+   },
+   "mlp": {
+    "f1": 0.97
+   }
+  },
+  "amazon-uci": {
+   "ours": "amazon-uci-approx",
+   "dlbac_r": {
+    "f1": 0.72,
+    "fpr": 0.06,
+    "tpr": 0.67,
+    "precision": 0.78
+   },
+   "rf": {
+    "f1": 0.74
+   },
+   "svm": {
+    "f1": 0.535
+   },
+   "mlp": {
+    "f1": 0.535
+   },
+   "approx": true,
+   "note": "approximate reconstruction (12161 tuples, paper 4224); shown for the qualitative pattern only, excluded from the tolerance count"
+  },
+  "u4k-r4k-auth11k": {
+   "ours": "u4k-r4k-auth11k",
+   "dlbac_r": {
+    "f1": 0.98,
+    "fpr": 0.02,
+    "tpr": 0.98,
+    "precision": 0.975
+   },
+   "rf": {
+    "f1": 0.978
+   },
+   "svm": {
+    "f1": 0.86
+   },
+   "mlp": {
+    "f1": 0.86
+   }
+  },
+  "u5k-r5k-auth12k": {
+   "ours": "u5k-r5k-auth12k",
+   "dlbac_r": {
+    "f1": 0.985,
+    "fpr": 0.015,
+    "tpr": 0.99,
+    "precision": 0.985
+   },
+   "rf": {
+    "f1": 0.987
+   },
+   "svm": {
+    "f1": 0.814
+   },
+   "mlp": {
+    "f1": 0.846
+   }
+  },
+  "u5k-r5k-auth19k": {
+   "ours": "u5k-r5k-auth19k",
+   "dlbac_r": {
+    "f1": 0.953,
+    "fpr": 0.035,
+    "tpr": 0.955,
+    "precision": 0.955
+   },
+   "rf": {
+    "f1": 0.918,
+    "fpr": 0.06
+   },
+   "svm": {
+    "f1": 0.764
+   },
+   "mlp": {
+    "f1": 0.794
+   }
+  },
+  "u4k-r4k-auth21k": {
+   "ours": "u4k-r4k-auth21k",
+   "dlbac_r": {
+    "f1": 0.968,
+    "fpr": 0.04,
+    "tpr": 0.98,
+    "precision": 0.96
+   },
+   "rf": {
+    "f1": 0.9,
+    "fpr": 0.105
+   },
+   "svm": {
+    "f1": 0.759
+   },
+   "mlp": {
+    "f1": 0.744
+   }
+  },
+  "u4k-r7k-auth20k": {
+   "ours": "u4k-r7k-auth20k",
+   "dlbac_r": {
+    "f1": 0.915,
+    "fpr": 0.075,
+    "tpr": 0.915,
+    "precision": 0.915
+   },
+   "rf": {
+    "f1": 0.888,
+    "fpr": 0.09
+   },
+   "svm": {
+    "f1": 0.74
+   },
+   "mlp": {
+    "f1": 0.787
+   }
+  },
+  "u4k-r4k-auth22k": {
+   "ours": "u4k-r4k-auth22k",
+   "dlbac_r": {
+    "f1": 0.897,
+    "fpr": 0.14,
+    "tpr": 0.897,
+    "precision": 0.9
+   },
+   "rf": {
+    "f1": 0.857,
+    "fpr": 0.225
+   },
+   "svm": {
+    "f1": 0.797
+   },
+   "mlp": {
+    "f1": 0.793
+   }
+  },
+  "u4k-r6k-auth28k": {
+   "ours": "u4k-r6k-auth28k",
+   "dlbac_r": {
+    "f1": 0.957,
+    "fpr": 0.037,
+    "tpr": 0.958,
+    "precision": 0.957
+   },
+   "rf": {
+    "f1": 0.862,
+    "fpr": 0.11
+   },
+   "svm": {
+    "f1": 0.668
+   },
+   "mlp": {
+    "f1": 0.7
+   }
+  },
+  "u6k-r6k-auth32k": {
+   "ours": "u6k-r6k-auth32k",
+   "dlbac_r": {
+    "f1": 0.97,
+    "fpr": 0.04,
+    "tpr": 0.982,
+    "precision": 0.96
+   },
+   "rf": {
+    "f1": 0.925,
+    "fpr": 0.088
+   },
+   "svm": {
+    "f1": 0.785
+   },
+   "mlp": {
+    "f1": 0.78
+   }
+  }
+ }
+}

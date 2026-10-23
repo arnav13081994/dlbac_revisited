@@ -1,0 +1,5 @@
+env -u VIRTUAL_ENV ./.venv/bin/python -I src/dlbac_revisited/run_cell.py main --ds amazon1 --seed 0 --group resnet --device mps --out results/h1/amazon1_s0_resnet.json > results/h1/amazon1_s0_resnet.log 2>&1
+env -u VIRTUAL_ENV ./.venv/bin/python -I src/dlbac_revisited/run_cell.py main --ds amazon1 --seed 1 --group resnet --device mps --out results/h1/amazon1_s1_resnet.json > results/h1/amazon1_s1_resnet.log 2>&1
+env -u VIRTUAL_ENV ./.venv/bin/python -I src/dlbac_revisited/run_cell.py main --ds amazon1 --seed 2 --group resnet --device mps --out results/h1/amazon1_s2_resnet.json > results/h1/amazon1_s2_resnet.log 2>&1
+env -u VIRTUAL_ENV ./.venv/bin/python -I src/dlbac_revisited/run_cell.py main --ds amazon1 --seed 3 --group resnet --device mps --out results/h1/amazon1_s3_resnet.json > results/h1/amazon1_s3_resnet.log 2>&1
+env -u VIRTUAL_ENV ./.venv/bin/python -I src/dlbac_revisited/run_cell.py main --ds amazon1 --seed 4 --group resnet --device mps --out results/h1/amazon1_s4_resnet.json > results/h1/amazon1_s4_resnet.log 2>&1

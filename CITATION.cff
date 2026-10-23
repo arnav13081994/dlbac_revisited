@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the paper in paper/."
+title: "Revisiting Deep Learning Based Access Control: Baseline Strength, Relational Features and Generalisation"
+type: software
+repository-code: "https://github.com/arnav13081994/dlbac_revisited"
+license: MIT
+authors:
+  - family-names: Choudhury
+    given-names: Arnav

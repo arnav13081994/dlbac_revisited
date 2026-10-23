@@ -1,0 +1,29 @@
+{
+ "exp": "main",
+ "ds": "amazon1",
+ "seed": 2,
+ "group": "resnet",
+ "tiny": false,
+ "protocol": "paper (released-code columns)",
+ "torch": "2.14.1",
+ "n_train": 26216,
+ "n_test": 6553,
+ "models": {
+  "resnet": {
+   "tn": 161,
+   "fp": 227,
+   "fn": 159,
+   "tp": 6006,
+   "precision": 0.9635809401572276,
+   "tpr": 0.9742092457420924,
+   "fpr": 0.5850515463917526,
+   "f1": 0.9688659461203419,
+   "acc": 0.9410956813673127,
+   "depth": 8,
+   "epochs": 60,
+   "final_train_loss": 0.0011510519493587682,
+   "seconds": 852,
+   "auc": 0.8168081788613808
+  }
+ }
+}

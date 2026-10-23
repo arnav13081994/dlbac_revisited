@@ -1,0 +1,26 @@
+{
+ "exp": "layout",
+ "ds": "u4k-r4k-auth11k",
+ "seed": 1,
+ "group": "resnet",
+ "tiny": false,
+ "protocol": "paper (released-code columns)",
+ "torch": "2.14.1",
+ "cond": "user",
+ "model": "mlp",
+ "n_train": 8772,
+ "n_test": 2192,
+ "models": {
+  "mlp_onehot": {
+   "tn": 4774,
+   "fp": 59,
+   "fn": 47,
+   "tp": 3888,
+   "precision": 0.9850519381808969,
+   "tpr": 0.9880559085133418,
+   "fpr": 0.012207738464721705,
+   "f1": 0.9865516366404465,
+   "acc": 0.9879105839416058
+  }
+ }
+}
