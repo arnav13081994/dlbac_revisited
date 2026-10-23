@@ -45,7 +45,7 @@ We keep to the authors' datasets, train/test split and metrics, and we follow th
 \item \textbf{Q3, the architecture.} Not as configured. On the authors' split the ResNet is not significantly different from the tuned MLP, SVM and GB. A hidden layer in its output head adds \vHeadVsResnetU{} F1 on all eight datasets (\vHeadEqVsEqU{} when both versions have the indicators), which takes it to a level not significantly different from the equality-aware MLP and RF on that split. On users and resources held out of training it still trails the equality-aware models, and we did not separate depth, parameters and non-linearity.
 \end{itemize}
 
-\paragraph{Contributions.} (i) A check that our PyTorch network reproduces the authors' shipped network, and a comparison of our runs with their published figures. (ii) A ladder from the paper's default baselines to tuned baselines, each without and with the indicators. (iii) A test of the label structure: generic features, and a control on a real-world dataset without such structure. (iv) A test of the ResNet with a hidden layer in its head, and of all models on users and resources held out of training. (v) Code and stored results.
+\paragraph{Contributions.} (i) A check that our PyTorch network reproduces the authors' shipped network, and a comparison of our runs with their published figures. (ii) A ladder from the paper's default baselines to tuned baselines, each with and without the indicators. (iii) A test of the label structure: generic features, and a control on a real-world dataset without such structure. (iv) A test of the ResNet with a hidden layer in its head, and of all models on users and resources held out of training. (v) Code and stored results.
 
 Table~\ref{tab:claims} lists the statements of the original paper that these experiments bear on. The paper makes further statements (on other network architectures, policy-mining baselines, distillation and interpretation) that we did not test.
 
@@ -114,7 +114,7 @@ Every model is run with five seeds on each dataset on the authors' split, and wi
 \section{Q1: does the advantage depend on the baselines' configuration?}\label{sec:baselines}
 
 \subsection{Result}
-The ordering of the published comparison reproduces: the ResNet has F1 \fResnet{}, against \fRfTheirs{} for RF, \fMlpRawTheirs{} for MLP and \fSvmTheirs{} for SVM (Table~\ref{tab:ladder}; Figure~\ref{fig:ladder}). Tuning with one-hot inputs changes the picture. The MLP rises to \fMlpTuned{} and the SVM to \fSvmTuned{}; gradient boosting reaches \fGbTuned{}. The ResNet's lead over these three is \dMlpTuned{}, \dSvmTuned{} and \dGbTuned{}, with $p$ of \pMlpTuned{}, \pSvmTuned{} and \pGbTuned{}. Not significant is not the same as equal: with eight datasets the test has limited power. A tuned RF reaches only \fRfTuned{}; the ResNet's lead of \dRfTuned{} is significant ($p=\pRfTuned$).
+The ordering of the published comparison reproduces: the ResNet has F1 \fResnet{}, against \fRfTheirs{} for RF, \fMlpRawTheirs{} for MLP and \fSvmTheirs{} for SVM (Table~\ref{tab:ladder}; Figure~\ref{fig:ladder}). Tuning with one-hot inputs changes the picture. The MLP rises to \fMlpTuned{} and the SVM to \fSvmTuned{}; gradient boosting reaches \fGbTuned{}. The ResNet's lead over these three is \dMlpTuned{}, \dSvmTuned{} and \dGbTuned{}, with $p$ of \pMlpTuned{}, \pSvmTuned{} and \pGbTuned{}. A tuned RF reaches only \fRfTuned{}; the ResNet's lead of \dRfTuned{} is significant ($p=\pRfTuned$).
 
 Each tuned RF, MLP and SVM is above its default version in \seedOrderConfig{}. The standard deviation over seeds of the ResNet's mean F1 is \seedSdResnet{}. Figure~\ref{fig:ladder} and Table~\ref{tab:ladder} also contain the baselines with the indicators, which Section~\ref{sec:labels} discusses.
 
@@ -153,7 +153,7 @@ Compared with the authors' ResNet (Table~\ref{tab:ladder}), the default RF with 
 \begin{table}[t]
 \centering\footnotesize
 \input{generated/tab_gain.tex}
-\caption{F1 (mean over eight datasets) of each family in the default and in the tuned configuration, without and with the 64 equality indicators. GB has no default configuration in the original paper.}
+\caption{F1 (mean over eight datasets) of each family in the default and in the tuned configuration, with and without the 64 equality indicators. GB has no default configuration in the original paper.}
 \label{tab:gain}
 \end{table}
 
